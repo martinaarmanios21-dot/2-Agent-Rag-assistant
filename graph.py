@@ -126,12 +126,21 @@ def reviewer_node(state: AgentState) -> AgentState:
         "verdict": result.get("verdict", "APPROVED"),
         "feedback": result.get("reason", "")
     }
-
 def router(state: AgentState):
-    if state["verdict"] == "APPROVED" or state["attempts"] >= 3:
+    if state["verdict"] == "APPROVED" or state["attempts"] >= 1:
         return END
     return "researcher"
-
+    
+    # Restrict unsupported drafts to return ONLY ONCE
+    revision_count = state.get("revision_count", 0)
+    if revision_count >= 1:
+        # Stop looping and output standard refusal
+        state["draft"] = "I cannot answer this query as it falls outside the provided documentation context."
+        return "END"
+    
+    # Increment counter and return to researcher for 1 revision attempt
+    state["revision_count"] = revision_count + 1
+    return "researcher"
 workflow = StateGraph(AgentState)
 workflow.add_node("researcher", researcher_node)
 workflow.add_node("reviewer", reviewer_node)
