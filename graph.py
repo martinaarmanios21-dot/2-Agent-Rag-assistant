@@ -10,6 +10,7 @@ from langchain_qdrant import QdrantVectorStore
 from langgraph.graph import StateGraph, END
 
 load_dotenv()
+api_key = os.getenv("GOOGLE_API_KEY")
 
 class AgentState(TypedDict):
     question: str
@@ -22,6 +23,7 @@ class AgentState(TypedDict):
 # Initialize Gemini
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.6-flash",
+    google_api_key=api_key,
     temperature=0,
     max_retries=5
 )
